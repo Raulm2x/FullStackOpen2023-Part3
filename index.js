@@ -2,6 +2,9 @@ const express = require("express")
 const app = express()
 app.use(express.json())
 
+const morgan = require('morgan')
+app.use(morgan('tiny'))
+
 let persons = [
     { 
       "id": 1,
@@ -43,7 +46,7 @@ app.get('/info', (request, response) => {
 app.get('/api/persons/:id', (request, response) => {
     const id = Number(request.params.id)
     const person = persons.find(p => p.id === id)
-    console.log(person)
+    //console.log(person)
 
     if (!person) {
         response.status(404).json({
@@ -56,6 +59,7 @@ app.get('/api/persons/:id', (request, response) => {
 
 app.delete('/api/persons/:id', (request, response) => {
     const id = Number(request.params.id)
+
     persons = persons.filter(person => person.id != id)
 
     response.status(204).end()
@@ -79,18 +83,17 @@ app.post('/api/persons', (request, response) => {
 
     if (!request.body || !request.body.number || !request.body.name ) {
         return response.status(400).json({
-            error: "content missing"
+            error: "missing content"
         })
     }
 
-    checkPerson = persons.some(p => p.name === request.body.name)
+    const checkPerson = persons.some(p => p.name === request.body.name)
 
     if (checkPerson) {
         return response.status(400).json({
             error: `name must be unique`
         })
     }
-
 
    const person = {
         "name": request.body.name,
