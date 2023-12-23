@@ -14,22 +14,22 @@ app.use(express.static('build'))
 let persons = [
     { 
       "id": 1,
-      "name": "Arto Hellas", 
+      "name": "Carl Jhonson", 
       "number": "040-123456"
     },
     { 
       "id": 2,
-      "name": "Ada Lovelace", 
+      "name": "Sweet", 
       "number": "39-44-5323523"
     },
     { 
       "id": 3,
-      "name": "Dan Abramov", 
+      "name": "Big Smoke", 
       "number": "12-43-234345"
     },
     { 
       "id": 4,
-      "name": "Mary Poppendieck", 
+      "name": "Ryder", 
       "number": "39-23-6423122"
     }
 ]
