@@ -10,69 +10,65 @@ app.use(morgan('tiny'))
 
 app.use(express.static('build'))
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
-const uri = "mongodb+srv://raulm2x:<whY9dRCZ7h2zEqnw>@cluster0.ga6npuf.mongodb.net/?retryWrites=true&w=majority";
 
+require('dotenv').config()
+const Person = require('./models/person')
 
-let persons = [
-    { 
-      "id": 1,
-      "name": "Carl Jhonson", 
-      "number": "040-123456"
-    },
-    { 
-      "id": 2,
-      "name": "Sweet", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": 3,
-      "name": "Big Smoke", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": 4,
-      "name": "Ryder", 
-      "number": "39-23-6423122"
-    }
-]
+if (process.argv.length<3) {
+  console.log('give password as argument')
+  process.exit(1)
+}
+
+const password = process.argv[2]
+
+/*
+const url =
+  `mongodb+srv://raulm2x:${password}@cluster0.ga6npuf.mongodb.net/phonebook?retryWrites=true&w=majority`
+*/
 
 app.get('/api/persons', (request, response) => {
-    response.json(persons)
-    console.log(persons.length, "persons were loaded.")
+    Person.find({}).then(persons => {
+        console.log(persons.length, "persons were loaded")
+        response.json(persons)
+      })
 })
 
 const date = new Date().toDateString()
 const time = new Date().toTimeString()
 
 app.get('/info', (request, response) => {
-    response.send(
-        `<p>Phonebook has info for ${persons.length} people</p>
-        <p>${date} ${time}</p>`
-    )
+    Person.find({}).then(persons => {
+        response.send(
+            `<p>Phonebook has info for ${persons.length} people</p>
+            <p>${date} ${time}</p>`
+        )
+      })
 })
 
 app.get('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    const person = persons.find(p => p.id === id)
-    console.log(person)
-
-    if (!person) {
+    const id = request.params.id
+    console.log(id)
+    
+    Person.findById(id)
+    .then(person => {
+        response.json(person)
+    })
+    .catch( error => {
+        console.error("Hubo un error", error)
         response.status(404).json({
             error:`person with id ${id} does not exist.`
         })
-    }
-
-    response.json(person)
+    })
 })
 
 app.delete('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    persons = persons.filter(person => person.id != id)
-
-    response.status(204).end()
+    const id = request.params.id
+    Person.findByIdAndDelete(id).then(person => {
+        response.status(204).end()
+    })
 })
 
+/*
 const generateId = () => {
     let id
 
@@ -85,9 +81,10 @@ const generateId = () => {
 
     return id
 }
+*/
 
 app.post('/api/persons', (request, response) => {
-   const id = generateId()
+   //const id = generateId()
 
     if (!request.body || !request.body.number || !request.body.name ) {
         return response.status(400).json({
@@ -95,6 +92,7 @@ app.post('/api/persons', (request, response) => {
         })
     }
 
+    /*
     checkPerson = persons.some(p => p.name === request.body.name)
 
     if (checkPerson) {
@@ -102,17 +100,16 @@ app.post('/api/persons', (request, response) => {
             error: `name must be unique`
         })
     }
+    */
 
-
-   const person = {
+   const person = new Person({
         "name": request.body.name,
         "number": request.body.number,
-        "id": id,
-   }
+   })
 
-   persons = persons.concat(person)
-
-   response.json(person)
+   person.save().then(savedPerson => {
+    response.json(savedPerson)
+   })
 
 })
 
