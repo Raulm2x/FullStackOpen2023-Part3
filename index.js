@@ -10,6 +10,9 @@ app.use(morgan('tiny'))
 
 app.use(express.static('build'))
 
+const { MongoClient, ServerApiVersion } = require('mongodb');
+const uri = "mongodb+srv://raulm2x:<whY9dRCZ7h2zEqnw>@cluster0.ga6npuf.mongodb.net/?retryWrites=true&w=majority";
+
 
 let persons = [
     { 
