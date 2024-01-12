@@ -9,23 +9,8 @@ app.use(cors())
 const morgan = require('morgan')
 app.use(morgan('tiny'))
 
-
-
-
 require('dotenv').config()
 const Person = require('./models/person')
-
-if (process.argv.length<3) {
-  console.log('give password as argument')
-  process.exit(1)
-}
-
-const password = process.argv[2]
-
-/*
-const url =
-  `mongodb+srv://raulm2x:${password}@cluster0.ga6npuf.mongodb.net/phonebook?retryWrites=true&w=majority`
-*/
 
 app.get('/api/persons', (request, response, next) => {
     Person.find({}).then(persons => {
