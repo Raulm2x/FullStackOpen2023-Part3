@@ -125,12 +125,15 @@ const App = () => {
       />
       <h3>Numbers</h3>
       <ul>
-        {personsToShow.map(person => (
-          <Persons 
-          key={person.id} 
-          person={person}
-          onClick={() => deletePerson(person.id)}
-          />))}
+        {persons.length>0? 
+          personsToShow.map(person => (
+            <Persons 
+            key={person.id} 
+            person={person}
+            onClick={() => deletePerson(person.id)}
+            />))
+          :<li>loading people...</li>
+        }
       </ul>
     </div>
   )
