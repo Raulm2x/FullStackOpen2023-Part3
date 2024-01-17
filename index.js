@@ -100,8 +100,9 @@ app.put('/api/persons/:id', (request, response, next) => {
         number: body.number,
       }
    
+    //Validators for updating don't work {new:true, runValidators: true, context: 'query'}
     Person.findByIdAndUpdate(request.params.id, newData, 
-        { new: true, runValidators: true, context: 'query'})
+        { new: true})
         .then(updatedPerson => {
             response.json(updatedPerson)
         })
