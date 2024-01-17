@@ -55,15 +55,26 @@ const App = () => {
       .create(newPerson)
       .then(addedPerson => {
         setPersons(persons.concat(addedPerson))
+        setNewNumber('')
+        setType(true)
+        setConfMessage(
+          `Added ${newPerson.name}`
+        )       
+        setTimeout(() => {
+          setConfMessage(null)
+        }, 5000)
       })
-      setNewNumber('')
-      setType(true)
-      setConfMessage(
-        `Added ${newPerson.name}`
-      )       
-      setTimeout(() => {
-        setConfMessage(null)
-      }, 5000)
+      .catch(error => {
+        // this is the way to access the error message
+        setType(false)
+        setConfMessage(
+          `Error: ${error.response.data.error}`
+        )       
+        setTimeout(() => {
+          setConfMessage(null)
+        }, 5000)
+        console.log(error.response.data.error)
+      })
     }
     setNewName('')
   }
