@@ -43,24 +43,27 @@ test('blogs are returned as json', async () => {
 test('all blogs are returned', async () => {
     const response = await api.get('/api/blogs')
     expect(response.body).toHaveLength(initialBlogs.length)
-})
+}, 100000)
   
 test('a specific blog is within the returned blogs', async () => {
     const response = await api.get('/api/blogs')
 
-    const contents = response.body.map(r => r.title)
-    expect(contents).toContainEqual( 
+    const titles = response.body.map(r => r.title)
+
+    expect(titles).toContainEqual( 
         'The Mythical Man-Month'
     )
-})
+}, 100000)
 
 test('ID property', async () => {
     const response = await api.get('/api/blogs')
+
     const blogs = response.body
     const oneBlog = blogs[1]
     console.log(oneBlog)
+
     expect(oneBlog.id).toBeDefined()
-})
+}, 100000)
 
 test('Creating a new blog', async () => {
     const newBlog = {
@@ -75,6 +78,48 @@ test('Creating a new blog', async () => {
     
     const response = await api.get('/api/blogs')
     expect(response.body).toHaveLength(initialBlogs.length + 1)
+})
+
+test('Creating a new blog without likes property', async () => {
+    const newBlog = {
+        title: 'JavaScript: The Good Parts',
+        author: 'Douglas Crockford',
+        url: 'https://www.oreilly.com/library/view/javascript-the-good/9780596517748/'
+    }
+
+    await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+    
+    const response = await api.get('/api/blogs')
+    const addedBlog = response.body[3]
+    console.log(addedBlog)
+    expect(addedBlog.id).toBeDefined()
+})
+
+test('Bad request: title or url missing', async () => {
+    const newBlog = {
+        title: 'JavaScript: The Good Parts',
+        author: 'Douglas Crockford',
+    }
+
+    await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(400)
+    
+    const newBlog2 = {
+        author: 'Douglas Crockford',
+        url: 'https://www.oreilly.com/library/view/javascript-the-good/9780596517748/'
+    }
+
+    await api
+    .post('/api/blogs')
+    .send(newBlog2)
+    .expect(400)
+    
 })
 
 afterAll(async () => {

@@ -9,13 +9,24 @@ blogsRouter.get('/', async (request, response) => {
 blogsRouter.get('/:id', async (request, response) => {
     const id = request.params.id
     const blog = await Blog.findById(id)
-    response.json(blog)
+    if (blog) {
+        response.json(blog)
+    } else {
+        response.status(404).end()
+    }
+    
+})
+
+blogsRouter.delete('/:id', async (request, response) => {
+    const id = request.params.id
+    await Blog.findByIdAndDelete(id)
+    response.status(204).end()
 })
 
 blogsRouter.post('/', async (request, response, next) => {
     const body = request.body
 
-    if (!body) {
+    if (!body || !body.title || !body.url) {
         return response.status(400).json({
             error: "content missing"
         })
@@ -25,10 +36,10 @@ blogsRouter.post('/', async (request, response, next) => {
         title: body.title,
         author: body.author,
         url: body.url,
-        likes: body.likes
+        likes: body.likes || 0
     })
 
-    const savedBlog = blog.save()
+    const savedBlog = await blog.save()
     response.status(201).json(savedBlog)
 })
 
