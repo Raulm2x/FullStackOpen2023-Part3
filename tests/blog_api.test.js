@@ -76,7 +76,7 @@ describe('Creating blogs', () => {
             url: 'http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html',
             likes: 5
         }
-    
+        
         const newBlogObject = new Blog(newBlog)
         await newBlogObject.save()
         
@@ -93,6 +93,7 @@ describe('Creating blogs', () => {
     
         await api
         .post('/api/blogs')
+        .set('Authorization', `Bearer ${user.token}`)
         .send(newBlog)
         .expect(201)
         .expect('Content-Type', /application\/json/)
