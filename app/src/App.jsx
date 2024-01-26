@@ -5,25 +5,32 @@ import loginService from './services/login'
 import ShowBlogs from './components/ShowBlogs'
 import BlogForm from './components/BlogForm'
 import LoginForm from './components/LoginForm'
+import LogOutButton from './components/LogOutButton'
+import Notification from './components/Notification'
 
 const App = () => {
   const [blogs,setBlogs] = useState([])
 
+  //New Blog Form
   const [newTitle, setNewTitle] = useState('')
   const [newAuthor, setNewAuthor] = useState('')
   const [newUrl, setNewUrl] = useState('')
   const [newLikes, setNewLikes] = useState(0)
 
-  //const [loggedIn, setLoggedIn] = useState(true)
+  //Login
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null) 
+
+  //Notification
+  const [Message, setMessage] = useState(null)
+  const [type, setType] = useState(true)
 
   const hook = async () => {
     try {
       const initialBlogs = await apiBlogs.getAll()
       setBlogs(initialBlogs)
-      console.log("blogs were loaded")
+      console.log(blogs.length,"blogs were loaded")
     } catch (error) {
       console.error(error)
     }
@@ -59,6 +66,15 @@ const App = () => {
     try {
       await apiBlogs.create(newBlog)
       setBlogs(blogs.concat(newBlog))
+
+      setType(true)
+      setMessage(
+        `a new blog ${newBlog.title} by ${newBlog.author} added`
+      )       
+      setTimeout(() => {
+        setMessage(null)
+      }, 5000)
+
       setNewAuthor('')
       setNewLikes(0)
       setNewTitle('')
@@ -89,18 +105,35 @@ const App = () => {
         'loggedBlogappUser', JSON.stringify(user)      ) 
       apiBlogs.setToken(user.token)
       setUser(user)
+      
+      setType(true)
+      setMessage(
+        `Successfully logged in`
+      )       
+      setTimeout(() => {
+        setMessage(null)
+      }, 5000)
+
       setUsername('')
       setPassword('')
     } catch (exception) {
       console.log('error in handle login')
-      /*
-        setErrorMessage('Wrong credentials')
-        setTimeout(() => {
-          setErrorMessage(null)
-        }, 5000)*/
+
+      setType(false)
+      setMessage(
+        `Wrong username or password`
+      )       
+      setTimeout(() => {
+        setMessage(null)
+      }, 5000)
     }
   }
 
+  const handleLogout = () => {
+    window.localStorage.removeItem('loggedBlogappUser')
+    setUser(null)
+  }
+  
   //OnChanges
   const handleNewTitle = (event) => {
     //console.log(event.target.value)
@@ -125,6 +158,7 @@ const App = () => {
   return (
     <div>
       <h1>Blog list</h1>
+      <Notification message={Message} type={type}/>
       {!user
         ?<div>
           <h2>Login</h2>
@@ -141,7 +175,10 @@ const App = () => {
         />
         </div>
         :<div>
-          <h3>Welcome {user.username}!</h3>
+          <p>
+            {user.username} logged in
+            <LogOutButton onClick={handleLogout}/>
+          </p>
           <ShowBlogs blogs={blogs} OnClick={handleLikeButton}/>
           <h2>Add a new blog</h2>
           <BlogForm
@@ -162,3 +199,5 @@ const App = () => {
 }
 
 export default App;
+
+
