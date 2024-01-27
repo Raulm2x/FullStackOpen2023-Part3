@@ -6,6 +6,7 @@ const BlogForm = (props) =>{
     } = props
     return (
         <div>
+            <h2>Add a new blog</h2>
             <form onSubmit={onSubmit}>
                 <label htmlFor="inputTitle">Title: </label>
                 <input id="inputTitle" value={title} onChange={onChangeTitle} /><br/>

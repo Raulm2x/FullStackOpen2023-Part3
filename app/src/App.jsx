@@ -7,6 +7,7 @@ import BlogForm from './components/BlogForm'
 import LoginForm from './components/LoginForm'
 import LogOutButton from './components/LogOutButton'
 import Notification from './components/Notification'
+import Togglable from './components/Togglable'
 
 const App = () => {
   const [blogs,setBlogs] = useState([])
@@ -21,6 +22,7 @@ const App = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null) 
+  const [login, setLogin] = useState(false)
 
   //Notification
   const [Message, setMessage] = useState(null)
@@ -155,43 +157,58 @@ const App = () => {
     setNewLikes(event.target.value)
   }
 
+  //Show Components
+  const showLoginForm = () => {
+    return (
+      <div>
+        <Togglable buttonLabel='Log in'>
+          <LoginForm
+              onSubmit = {handleLogin}
+              username = {username}
+              onChangeUsername = {
+                (event) => setUsername(event.target.value)
+              }
+              password = {password}
+              onChangePassword = {
+                (event) => setPassword(event.target.value)
+              }
+            />
+        </Togglable>
+      </div>
+    )
+  }
+
+  const showBlogForm = () => {
+    return (
+      <div>
+        <BlogForm
+          onSubmit = {addBlog}
+          onChangeTitle = {handleNewTitle}
+          onChangeAuthor = {handleNewAuthor}
+          onChangeUrl = {handleNewUrl}
+          onChangeLikes = {handleNewLikes}
+          title = {newTitle}
+          author = {newAuthor}
+          url = {newUrl}
+          likes = {newLikes}
+        />
+      </div>
+    )
+  }
+
   return (
     <div>
       <h1>Blog list</h1>
       <Notification message={Message} type={type}/>
-      {!user
-        ?<div>
-          <h2>Login</h2>
-        <LoginForm
-          onSubmit = {handleLogin}
-          username = {username}
-          onChangeUsername = {
-            (event) => setUsername(event.target.value)
-          }
-          password = {password}
-          onChangePassword = {
-            (event) => setPassword(event.target.value)
-          }
-        />
-        </div>
-        :<div>
+      {!user && showLoginForm()}
+      {user &&
+        <div>
           <p>
             {user.username} logged in
             <LogOutButton onClick={handleLogout}/>
           </p>
           <ShowBlogs blogs={blogs} OnClick={handleLikeButton}/>
-          <h2>Add a new blog</h2>
-          <BlogForm
-            onSubmit = {addBlog}
-            onChangeTitle = {handleNewTitle}
-            onChangeAuthor = {handleNewAuthor}
-            onChangeUrl = {handleNewUrl}
-            onChangeLikes = {handleNewLikes}
-            title = {newTitle}
-            author = {newAuthor}
-            url = {newUrl}
-            likes = {newLikes}
-          />
+          {showBlogForm()}
         </div>
       }
     </div>

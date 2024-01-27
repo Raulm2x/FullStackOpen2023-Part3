@@ -6,6 +6,7 @@ const LoginForm = (props) => {
     } = props
     return (
         <form onSubmit={onSubmit}>
+            <h2>Login</h2>
             <div>
                 username
                 <input
