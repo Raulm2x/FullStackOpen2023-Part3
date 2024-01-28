@@ -4,8 +4,6 @@ const BlogForm = ({createBlog}) =>{
     const [newTitle, setNewTitle] = useState('')
     const [newAuthor, setNewAuthor] = useState('')
     const [newUrl, setNewUrl] = useState('')
-    const [newLikes, setNewLikes] = useState(0)
-
     //OnChanges
     const handleNewTitle = (event) => {
         //console.log(event.target.value)
@@ -33,7 +31,6 @@ const BlogForm = ({createBlog}) =>{
             title: newTitle,
             author: newAuthor || 'Unknown',
             url: newUrl || 'Not found',
-            likes: Number(newLikes) || 0,
         }
         createBlog(newBlog)
         setNewAuthor('')
@@ -55,9 +52,6 @@ const BlogForm = ({createBlog}) =>{
 
                 <label htmlFor="inputUrl">Url: </label>
                 <input id="inputUrl" value={newUrl} onChange={handleNewUrl} /><br/>
-
-                <label htmlFor="inputLikes">Likes: </label>
-                <input id="inputLikes" value={newLikes} onChange={handleNewLikes} /><br/>
 
                 <button type="submit">Save</button>
             </form>

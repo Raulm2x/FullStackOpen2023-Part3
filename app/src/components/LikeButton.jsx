@@ -1,7 +1,8 @@
-const LikeButton = ({blog, OnClick}) => {
+const LikeButton = ({blog, OnClick, liked}) => {
+    const text = liked? 'Dislike':'Like'
     return (
-        <button onClick={()=> OnClick(blog)}>
-            Like
+        <button onClick={()=> OnClick(blog, !liked)}>
+            {text}
         </button>
     )
 }

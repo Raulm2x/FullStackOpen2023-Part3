@@ -66,16 +66,41 @@ blogsRouter.post('/', async (request, response, next) => {
 
 blogsRouter.put('/:id', async (request, response, next) => {
     const body = request.body
-  
+    const user = request.user
+   
+    const blog = await Blog.findById(request.params.id)
+
+    const action = body.action? 1 : -1
+
+    const userList = body.action
+        ? blog.likedBy.concat(user.id)
+        : blog.likedBy.filter(u => u != user.id)
+    
+    console.log('userList',userList)
+    
     const newData = {
         title: body.title,
         author: body.author,
         url: body.url,
-        likes: body.likes
+        likes: blog.likedBy? blog.likedBy.length + action : 1,
+        likedBy: userList
     }
-   
+    
+    console.log('newData',newData)
     const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, newData, 
         { new: true})
+
+    console.log('updateBlog',updatedBlog)
+    
+
+    if (user) {
+        const blogList = body.action
+            ? user.liked.concat(updatedBlog._id)
+            : user.liked.filter(b => b != updatedBlog._id)
+        user.liked = blogList
+        await user.save()
+    }
+    
     response.status(200).json(updatedBlog)
 })
 

@@ -1,6 +1,6 @@
 import BlogDetails from "./BlogDetails"
 
-const ShowBlogs = ({blogs, OnClick, loggedIn}) => {
+const ShowBlogs = ({blogs, OnClick, user}) => {
     return (
         <div>
             <ul>
@@ -9,7 +9,7 @@ const ShowBlogs = ({blogs, OnClick, loggedIn}) => {
                         key={index}
                         blog={blog}
                         OnClick={OnClick}
-                        loggedIn = {loggedIn}
+                        user = {user}
                     />
                 ))}
             </ul>

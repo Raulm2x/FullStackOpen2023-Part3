@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useSyncExternalStore } from 'react'
 import apiBlogs from './services/apiBlogs'
 import loginService from './services/login'
+import apiUsers from './services/apiUsers'
 
 import ShowBlogs from './components/ShowBlogs'
 import BlogForm from './components/BlogForm'
@@ -13,7 +14,9 @@ const App = () => {
   const [blogs,setBlogs] = useState([])
 
   //Login
-  const [user, setUser] = useState(null) 
+  const [user, setUser] = useState(null)
+  const [users, setUsers] = useState([])
+  const [currentUser, setCurrentUser] = useState(null)
  
   //Notification
   const [Message, setMessage] = useState(null)
@@ -31,7 +34,25 @@ const App = () => {
       console.error(error)
     }
   };
+
+  const fetchUsers = async () => {
+    try {
+      const userList = await apiUsers.getAll()
+      setUsers(userList)
+      console.log(userList)
+      const foundUser = userList.find(u => u.username === user.username)
+      setCurrentUser(foundUser)
+      console.log(foundUser)
+    } catch (error) {
+      console.error(error)
+    }
+  }
   
+  useEffect(() => {
+    if (user) {
+      fetchUsers()
+    }
+  }, [user])
   
   useEffect(() => {
      hook()
@@ -39,9 +60,7 @@ const App = () => {
 
   useEffect(() => {
     hook()
- }, [count])
-
-
+  }, [count])
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
@@ -72,15 +91,23 @@ const App = () => {
     }
   }
 
-  const handleLikeButton = (blog) =>{
-    console.log('liked')
-    const updatedBlog = {...blog, likes:blog.likes +1}
-    //console.log('updated blog', updatedBlog)
-    setBlogs(blogs.map(
-      b => b.title === updatedBlog.title
-        ? updatedBlog
-        : b
-    ))
+  const handleLikeButton = async (blog, action) => {
+    console.log(user)
+    console.log('likedBy',blog.likedBy)
+    const updatedBlog = {...blog, action}
+
+    try {
+      await apiBlogs.update(blog.id, updatedBlog)
+      console.log(action? 'liked':'unliked')
+      setBlogs(blogs.map(
+        b => b.id === updatedBlog.id
+          ? updatedBlog
+          : b
+      ))
+      setCount(count + 1)
+    } catch (error){
+      console.error(error)
+    }
   }
 
   const handleLogin = async (userData) => {
@@ -116,6 +143,8 @@ const App = () => {
   const handleLogout = () => {
     window.localStorage.removeItem('loggedBlogappUser')
     setUser(null)
+    setCurrentUser(null)
+    setUsers([])
   }
   
  
@@ -161,7 +190,7 @@ const App = () => {
         <ShowBlogs
             blogs={blogs}
             OnClick={handleLikeButton}
-            loggedIn={user}
+            user={currentUser}
         />
       </div>
       

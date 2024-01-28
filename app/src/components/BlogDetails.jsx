@@ -1,7 +1,7 @@
 import { useState } from "react"
 import LikeButton from "./LikeButton"
 
-const BlogDetails = ({blog, OnClick, loggedIn}) => {
+const BlogDetails = ({blog, OnClick, user}) => {
     const [visible, setVisible] = useState(true)
 
     const button = () => {
@@ -12,6 +12,13 @@ const BlogDetails = ({blog, OnClick, loggedIn}) => {
         )
     }
 
+    let likedBlog
+    if (user){
+        likedBlog = blog.likedBy
+        ? blog.likedBy.some(u => u === user.id)
+        : false
+    }
+    
     return (
         <li>
             <h3>{blog.title} {button()}</h3>
@@ -21,12 +28,12 @@ const BlogDetails = ({blog, OnClick, loggedIn}) => {
                 Author: {blog.author}<br/>
                 Url: <a href={blog.url} target="_blank">{blog.url}</a><br/>
                 Likes: {blog.likes}<br/>
-                {(blog.user && loggedIn) &&
+                {(blog.user && user) &&
                     <div>
-                    Posted by: {blog.user.name || blog.user.username}
+                    Posted by: {blog.user.name || blog.user.username} 
                     </div>
                 }
-                <LikeButton OnClick={OnClick} blog={blog}/> 
+                {user && <LikeButton OnClick={OnClick} blog={blog} liked={likedBlog}/>}
             </div>
             }
         </li>

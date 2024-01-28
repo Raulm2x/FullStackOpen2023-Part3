@@ -16,6 +16,13 @@ const userSchema = new mongoose.Schema({
       required:false
     }
   ],
+  liked: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Blog',
+      required:false
+    }
+  ],
 })
 
 userSchema.plugin(uniqueValidator)
