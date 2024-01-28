@@ -1,19 +1,16 @@
-import LikeButton from "./LikeButton"
+import BlogDetails from "./BlogDetails"
 
-const ShowBlogs = ({blogs, OnClick}) => {
+const ShowBlogs = ({blogs, OnClick, loggedIn}) => {
     return (
         <div>
             <ul>
                 {blogs.map((blog, index) => (
-                    <li key={index}>
-                        <h3>{blog.title}</h3>
-                        <LikeButton OnClick={OnClick} blog={blog}/>
-                        <p>
-                            Author: {blog.author}<br/>
-                            Url: <a href={blog.url} target="_blank">{blog.url}</a><br/>
-                            Likes: {blog.likes}
-                        </p> 
-                    </li>
+                    <BlogDetails
+                        key={index}
+                        blog={blog}
+                        OnClick={OnClick}
+                        loggedIn = {loggedIn}
+                    />
                 ))}
             </ul>
         </div>

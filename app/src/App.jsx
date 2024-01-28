@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import apiBlogs from './services/apiBlogs'
 import loginService from './services/login'
 
@@ -12,21 +12,15 @@ import Togglable from './components/Togglable'
 const App = () => {
   const [blogs,setBlogs] = useState([])
 
-  //New Blog Form
-  const [newTitle, setNewTitle] = useState('')
-  const [newAuthor, setNewAuthor] = useState('')
-  const [newUrl, setNewUrl] = useState('')
-  const [newLikes, setNewLikes] = useState(0)
-
   //Login
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
   const [user, setUser] = useState(null) 
-  const [login, setLogin] = useState(false)
-
+ 
   //Notification
   const [Message, setMessage] = useState(null)
   const [type, setType] = useState(true)
+
+  //Refresher
+  const [count, setCount] = useState(0)
 
   const hook = async () => {
     try {
@@ -40,10 +34,14 @@ const App = () => {
   
   
   useEffect(() => {
-    if (user){
-      hook()
-    }
-  }, [user])
+     hook()
+  }, [])
+
+  useEffect(() => {
+    hook()
+ }, [count])
+
+
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
@@ -54,21 +52,14 @@ const App = () => {
     } 
   }, [])
   
-  
-
-  const addBlog = async (event) => {
-    event.preventDefault()
-
-    const newBlog = {
-      title: newTitle,
-      author: newAuthor || 'Unknown',
-      url: newUrl || 'Not found',
-      likes: Number(newLikes) || 0,
-    }
+  const blogFormRef = useRef()
+  const addBlog = async (newBlog) => {
     try {
       await apiBlogs.create(newBlog)
       setBlogs(blogs.concat(newBlog))
+      blogFormRef.current.toggleVisibility()
 
+      setCount(count + 1)
       setType(true)
       setMessage(
         `a new blog ${newBlog.title} by ${newBlog.author} added`
@@ -76,11 +67,6 @@ const App = () => {
       setTimeout(() => {
         setMessage(null)
       }, 5000)
-
-      setNewAuthor('')
-      setNewLikes(0)
-      setNewTitle('')
-      setNewUrl('')
     } catch (error) {
       console.error(error)
     }
@@ -97,14 +83,12 @@ const App = () => {
     ))
   }
 
-  const handleLogin = async (event) => {
-    event.preventDefault()
+  const handleLogin = async (userData) => {
     try {
-      const user = await loginService.login({
-        username, password,
-      })
+      const user = await loginService.login(userData)
       window.localStorage.setItem(
-        'loggedBlogappUser', JSON.stringify(user)      ) 
+        'loggedBlogappUser', JSON.stringify(user)
+      ) 
       apiBlogs.setToken(user.token)
       setUser(user)
       
@@ -116,8 +100,6 @@ const App = () => {
         setMessage(null)
       }, 5000)
 
-      setUsername('')
-      setPassword('')
     } catch (exception) {
       console.log('error in handle login')
 
@@ -136,62 +118,29 @@ const App = () => {
     setUser(null)
   }
   
-  //OnChanges
-  const handleNewTitle = (event) => {
-    //console.log(event.target.value)
-    setNewTitle(event.target.value)
-  }
-
-  const handleNewAuthor = (event) => {
-    //console.log(event.target.value)
-    setNewAuthor(event.target.value)
-  }
-
-  const handleNewUrl = (event) => {
-    //console.log(event.target.value)
-    setNewUrl(event.target.value)
-  }
-
-  const handleNewLikes = (event) => {
-    //console.log(event.target.value)
-    setNewLikes(event.target.value)
-  }
-
+ 
   //Show Components
   const showLoginForm = () => {
     return (
       <div>
         <Togglable buttonLabel='Log in'>
           <LoginForm
-              onSubmit = {handleLogin}
-              username = {username}
-              onChangeUsername = {
-                (event) => setUsername(event.target.value)
-              }
-              password = {password}
-              onChangePassword = {
-                (event) => setPassword(event.target.value)
-              }
-            />
+             handleLogin={handleLogin}
+          />
         </Togglable>
       </div>
     )
   }
 
+
   const showBlogForm = () => {
     return (
       <div>
+      <Togglable buttonLabel='Add blog' ref={blogFormRef}>
         <BlogForm
-          onSubmit = {addBlog}
-          onChangeTitle = {handleNewTitle}
-          onChangeAuthor = {handleNewAuthor}
-          onChangeUrl = {handleNewUrl}
-          onChangeLikes = {handleNewLikes}
-          title = {newTitle}
-          author = {newAuthor}
-          url = {newUrl}
-          likes = {newLikes}
+          createBlog = {addBlog}
         />
+      </Togglable>
       </div>
     )
   }
@@ -201,16 +150,21 @@ const App = () => {
       <h1>Blog list</h1>
       <Notification message={Message} type={type}/>
       {!user && showLoginForm()}
-      {user &&
-        <div>
-          <p>
+      <div>
+        {user &&
+          <div>
             {user.username} logged in
             <LogOutButton onClick={handleLogout}/>
-          </p>
-          <ShowBlogs blogs={blogs} OnClick={handleLikeButton}/>
-          {showBlogForm()}
-        </div>
-      }
+            {showBlogForm()}
+          </div>
+        }
+        <ShowBlogs
+            blogs={blogs}
+            OnClick={handleLikeButton}
+            loggedIn={user}
+        />
+      </div>
+      
     </div>
   )
 }
