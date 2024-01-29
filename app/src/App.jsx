@@ -10,6 +10,8 @@ import LogOutButton from './components/LogOutButton'
 import Notification from './components/Notification'
 import Togglable from './components/Togglable'
 
+import listHelper from '../../utils/list_helper'
+
 const App = () => {
   const [blogs,setBlogs] = useState([])
 
@@ -28,7 +30,8 @@ const App = () => {
   const hook = async () => {
     try {
       const initialBlogs = await apiBlogs.getAll()
-      setBlogs(initialBlogs)
+      const sortedBlogs = listHelper.sortByLikes(initialBlogs)
+      setBlogs(sortedBlogs)
       console.log(blogs.length,"blogs were loaded")
     } catch (error) {
       console.error(error)
@@ -39,10 +42,10 @@ const App = () => {
     try {
       const userList = await apiUsers.getAll()
       setUsers(userList)
-      console.log(userList)
+      //console.log(userList)
       const foundUser = userList.find(u => u.username === user.username)
       setCurrentUser(foundUser)
-      console.log(foundUser)
+      //console.log(foundUser)
     } catch (error) {
       console.error(error)
     }
@@ -71,6 +74,7 @@ const App = () => {
     } 
   }, [])
   
+  // Add a new blog
   const blogFormRef = useRef()
   const addBlog = async (newBlog) => {
     try {
@@ -91,14 +95,15 @@ const App = () => {
     }
   }
 
+  //Like Button
   const handleLikeButton = async (blog, action) => {
-    console.log(user)
-    console.log('likedBy',blog.likedBy)
+    //console.log(user)
+    //console.log('likedBy',blog.likedBy)
     const updatedBlog = {...blog, action}
 
     try {
       await apiBlogs.update(blog.id, updatedBlog)
-      console.log(action? 'liked':'unliked')
+      console.log(action? 'liked':'disliked')
       setBlogs(blogs.map(
         b => b.id === updatedBlog.id
           ? updatedBlog
@@ -110,6 +115,26 @@ const App = () => {
     }
   }
 
+  //Remove Button
+  const handleRemove = async (blog) => {
+    if (window.confirm(`Delete titled blog: ${blog.title}?`)) {
+      try{
+        await apiBlogs.erase(blog.id)
+        setCount(count + 1)
+        setType(true)
+        setMessage(
+          `${blog.title} by ${blog.author} was removed`
+        )       
+        setTimeout(() => {
+          setMessage(null)
+        }, 5000)
+      } catch (error) {
+        console.error(error)
+      }
+    }
+  }
+
+  // Log in
   const handleLogin = async (userData) => {
     try {
       const user = await loginService.login(userData)
@@ -140,6 +165,7 @@ const App = () => {
     }
   }
 
+  //Log Out
   const handleLogout = () => {
     window.localStorage.removeItem('loggedBlogappUser')
     setUser(null)
@@ -148,7 +174,7 @@ const App = () => {
   }
   
  
-  //Show Components
+  //-----Show Components-----
   const showLoginForm = () => {
     return (
       <div>
@@ -161,7 +187,6 @@ const App = () => {
     )
   }
 
-
   const showBlogForm = () => {
     return (
       <div>
@@ -173,6 +198,7 @@ const App = () => {
       </div>
     )
   }
+
 
   return (
     <div>
@@ -191,6 +217,7 @@ const App = () => {
             blogs={blogs}
             OnClick={handleLikeButton}
             user={currentUser}
+            handleRemove={handleRemove}
         />
       </div>
       

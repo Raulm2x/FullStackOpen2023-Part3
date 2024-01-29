@@ -1,4 +1,5 @@
-const listHelper = require('../utils/list_helper')
+import listHelper from "../utils/list_helper"
+
 
 describe('dummy', () => {
     test('dummy returns one', () => {
@@ -115,4 +116,6 @@ describe('most blogs or likes', () => {
             likes: 8 + 5 + 18 + 25
         })
     })
+
+    console.log(listHelper.sortByLikes(blogs))
 })

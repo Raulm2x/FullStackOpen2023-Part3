@@ -4,12 +4,12 @@ const baseUrl = '/api/blogs'
 let token = null
 const setToken = newToken => {  token = `Bearer ${newToken}`}
 
-const getAll = () => {
+const getAll = async () => {
     const config = {
         headers: { Authorization: token },
     }
-    const request = axios.get(baseUrl, config)
-    return request.then(response => response.data)
+    const request = await axios.get(baseUrl, config)
+    return request.data
 }
 
 const create = async newObject => {
@@ -21,18 +21,21 @@ const create = async newObject => {
 }
 
 
-const update = (id, newObject) => {
+const update = async (id, newObject) => {
     const config = {
         headers: { Authorization: token },
     }
-    const request = axios.put(`${baseUrl}/${id}`, newObject, config)
-    return request.then(response => response.data)
+    const request = await axios.put(`${baseUrl}/${id}`, newObject, config)
+    return request.data
 }
 
 // use some other name for variable!
-const erase = (id) => {
-    const request = axios.delete(`${baseUrl}/${id}`)
-    return request.then(response => response.data)
+const erase = async (id) => {
+    const config = {
+        headers: { Authorization: token },
+    }
+    const request = await axios.delete(`${baseUrl}/${id}`, config)
+    return request.data
   }
 
 export default {getAll,create, update, erase, setToken}

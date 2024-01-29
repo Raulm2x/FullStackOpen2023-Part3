@@ -97,11 +97,16 @@ const mostLikes = (blogs) => {
         likes: result.maxParam
     }
 }
+
+const sortByLikes = (blogs) => {
+    return blogs.sort((a, b) => b.likes - a.likes)
+}
   
-module.exports = {
+export default {
     dummy,
     totalLikes,
     favoriteBlog,
     mostBlogs,
-    mostLikes
+    mostLikes,
+    sortByLikes
 }

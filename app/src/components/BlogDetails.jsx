@@ -1,7 +1,8 @@
 import { useState } from "react"
 import LikeButton from "./LikeButton"
+import RemoveButton from "./RemoveButton"
 
-const BlogDetails = ({blog, OnClick, user}) => {
+const BlogDetails = ({blog, OnClick, user, handleRemove}) => {
     const [visible, setVisible] = useState(true)
 
     const button = () => {
@@ -15,10 +16,12 @@ const BlogDetails = ({blog, OnClick, user}) => {
     let likedBlog
     if (user){
         likedBlog = blog.likedBy
-        ? blog.likedBy.some(u => u === user.id)
-        : false
+            ? blog.likedBy.some(u => u === user.id)
+            : false
     }
-    
+
+    const ownedBlog = user? user.blogs.find(b => b.id === blog.id): false
+
     return (
         <li>
             <h3>{blog.title} {button()}</h3>
@@ -27,13 +30,15 @@ const BlogDetails = ({blog, OnClick, user}) => {
                 
                 Author: {blog.author}<br/>
                 Url: <a href={blog.url} target="_blank">{blog.url}</a><br/>
-                Likes: {blog.likes}<br/>
+                Likes: {blog.likes}
+                {user && <LikeButton OnClick={OnClick} blog={blog} liked={likedBlog}/>}
+                <br/>
                 {(blog.user && user) &&
                     <div>
                     Posted by: {blog.user.name || blog.user.username} 
                     </div>
                 }
-                {user && <LikeButton OnClick={OnClick} blog={blog} liked={likedBlog}/>}
+                {ownedBlog && <RemoveButton handleRemove={handleRemove} blog={blog}/>}
             </div>
             }
         </li>

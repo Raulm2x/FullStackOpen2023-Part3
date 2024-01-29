@@ -76,7 +76,7 @@ blogsRouter.put('/:id', async (request, response, next) => {
         ? blog.likedBy.concat(user.id)
         : blog.likedBy.filter(u => u != user.id)
     
-    console.log('userList',userList)
+    //console.log('userList',userList)
     
     const newData = {
         title: body.title,
@@ -86,11 +86,11 @@ blogsRouter.put('/:id', async (request, response, next) => {
         likedBy: userList
     }
     
-    console.log('newData',newData)
+    //console.log('newData',newData)
     const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, newData, 
         { new: true})
 
-    console.log('updateBlog',updatedBlog)
+    //console.log('updateBlog',updatedBlog)
     
 
     if (user) {
