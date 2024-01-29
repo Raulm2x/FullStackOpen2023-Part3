@@ -1,10 +1,16 @@
-const LikeButton = ({blog, OnClick, liked}) => {
-    const text = liked? 'Dislike':'Like'
-    return (
-        <button onClick={()=> OnClick(blog, !liked)}>
-            {text}
-        </button>
-    )
+import { useState } from 'react'
+
+const LikeButton = (props) => {
+  const { blog, OnClick, liked } = props
+  const [likedStatus, setLikedStatus] = useState(liked)
+
+  const changeButton = () => {
+    setLikedStatus(!likedStatus)
+    console.log(likedStatus)
+  }
+
+  let text = likedStatus ? 'Dislike' : 'Like'
+  return <button onClick={() => OnClick(blog, !likedStatus)}>{text}</button>
 }
 
 export default LikeButton

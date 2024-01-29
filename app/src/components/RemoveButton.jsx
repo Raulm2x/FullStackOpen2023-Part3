@@ -1,7 +1,7 @@
-const RemoveButton = ({handleRemove, blog}) => (
-    <button onClick={() => handleRemove(blog)}>
+const RemoveButton = ({ handleRemove, blog }) => (
+  <button onClick={() => handleRemove(blog)}>
         remove
-    </button>
+  </button>
 )
 
 export default RemoveButton

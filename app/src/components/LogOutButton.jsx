@@ -1,11 +1,9 @@
-const LogOutButton = ({onClick}) => {
-    return (
-        <>
-            <button onClick={onClick}>
-                Log out
-            </button>
-        </>
-    )
+const LogOutButton = ({ onClick }) => {
+  return (
+    <>
+      <button onClick={onClick}> Log out </button>
+    </>
+  )
 }
 
 export default LogOutButton

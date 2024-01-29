@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useSyncExternalStore } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import apiBlogs from './services/apiBlogs'
 import loginService from './services/login'
 import apiUsers from './services/apiUsers'
@@ -19,51 +19,44 @@ const App = () => {
   const [user, setUser] = useState(null)
   const [users, setUsers] = useState([])
   const [currentUser, setCurrentUser] = useState(null)
- 
+
   //Notification
   const [Message, setMessage] = useState(null)
   const [type, setType] = useState(true)
 
-  //Refresher
-  const [count, setCount] = useState(0)
-
-  const hook = async () => {
+  const hook = useCallback( async () => {
     try {
       const initialBlogs = await apiBlogs.getAll()
       const sortedBlogs = listHelper.sortByLikes(initialBlogs)
       setBlogs(sortedBlogs)
-      console.log(blogs.length,"blogs were loaded")
+      console.log(blogs.length,'blogs were loaded')
     } catch (error) {
       console.error(error)
     }
-  };
+  }, [blogs])
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback( async () => {
     try {
       const userList = await apiUsers.getAll()
       setUsers(userList)
       //console.log(userList)
       const foundUser = userList.find(u => u.username === user.username)
       setCurrentUser(foundUser)
-      //console.log(foundUser)
+      console.log('user loaded')
     } catch (error) {
       console.error(error)
     }
-  }
-  
+  }, [user])
+
   useEffect(() => {
     if (user) {
       fetchUsers()
     }
-  }, [user])
-  
-  useEffect(() => {
-     hook()
-  }, [])
+  }, [user, fetchUsers])
 
   useEffect(() => {
     hook()
-  }, [count])
+  }, [])
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
@@ -71,9 +64,9 @@ const App = () => {
       const user = JSON.parse(loggedUserJSON)
       setUser(user)
       apiBlogs.setToken(user.token)
-    } 
+    }
   }, [])
-  
+
   // Add a new blog
   const blogFormRef = useRef()
   const addBlog = async (newBlog) => {
@@ -82,14 +75,16 @@ const App = () => {
       setBlogs(blogs.concat(newBlog))
       blogFormRef.current.toggleVisibility()
 
-      setCount(count + 1)
+      fetchUsers()
+
       setType(true)
       setMessage(
         `a new blog ${newBlog.title} by ${newBlog.author} added`
-      )       
+      )
       setTimeout(() => {
         setMessage(null)
       }, 5000)
+      hook()
     } catch (error) {
       console.error(error)
     }
@@ -97,19 +92,26 @@ const App = () => {
 
   //Like Button
   const handleLikeButton = async (blog, action) => {
-    //console.log(user)
-    //console.log('likedBy',blog.likedBy)
-    const updatedBlog = {...blog, action}
+    const updatedBlog = { ...blog, action }
 
     try {
       await apiBlogs.update(blog.id, updatedBlog)
       console.log(action? 'liked':'disliked')
-      setBlogs(blogs.map(
-        b => b.id === updatedBlog.id
-          ? updatedBlog
-          : b
+
+      const upBlogs = blogs.map(b => (b.id === blog.id
+        ? { ...blog,
+          likes: blog.likes + (action? 1:-1)
+        }
+        : b
       ))
-      setCount(count + 1)
+      setBlogs(upBlogs)
+      const upUser = { ...currentUser,
+        liked: action
+          ? currentUser.liked.concat(blog.id)
+          : currentUser.liked.filter(l => l !== blog.id) }
+      setCurrentUser(upUser)
+      setUsers(users.map(u => u.id === upUser.id? upUser : u ))
+
     } catch (error){
       console.error(error)
     }
@@ -120,14 +122,22 @@ const App = () => {
     if (window.confirm(`Delete titled blog: ${blog.title}?`)) {
       try{
         await apiBlogs.erase(blog.id)
-        setCount(count + 1)
+
+        const upUser = { ...currentUser,
+          blogs: currentUser.blogs.filter(l => l !== blog.id) }
+        setCurrentUser(upUser)
+
+        const upBlogs = blogs.filter(b => b.id !== blog.id)
+        setBlogs(upBlogs)
+
         setType(true)
         setMessage(
           `${blog.title} by ${blog.author} was removed`
-        )       
+        )
         setTimeout(() => {
           setMessage(null)
         }, 5000)
+
       } catch (error) {
         console.error(error)
       }
@@ -140,14 +150,14 @@ const App = () => {
       const user = await loginService.login(userData)
       window.localStorage.setItem(
         'loggedBlogappUser', JSON.stringify(user)
-      ) 
+      )
       apiBlogs.setToken(user.token)
       setUser(user)
-      
+
       setType(true)
       setMessage(
-        `Successfully logged in`
-      )       
+        'Successfully logged in'
+      )
       setTimeout(() => {
         setMessage(null)
       }, 5000)
@@ -157,8 +167,8 @@ const App = () => {
 
       setType(false)
       setMessage(
-        `Wrong username or password`
-      )       
+        'Wrong username or password'
+      )
       setTimeout(() => {
         setMessage(null)
       }, 5000)
@@ -172,15 +182,15 @@ const App = () => {
     setCurrentUser(null)
     setUsers([])
   }
-  
- 
+
+
   //-----Show Components-----
   const showLoginForm = () => {
     return (
       <div>
         <Togglable buttonLabel='Log in'>
           <LoginForm
-             handleLogin={handleLogin}
+            handleLogin={handleLogin}
           />
         </Togglable>
       </div>
@@ -190,15 +200,25 @@ const App = () => {
   const showBlogForm = () => {
     return (
       <div>
-      <Togglable buttonLabel='Add blog' ref={blogFormRef}>
-        <BlogForm
-          createBlog = {addBlog}
-        />
-      </Togglable>
+        <Togglable buttonLabel='Add blog' ref={blogFormRef}>
+          <BlogForm
+            createBlog = {addBlog}
+          />
+        </Togglable>
       </div>
     )
   }
 
+  const shBlogs = () => {
+    return (
+      <ShowBlogs
+        blogs={blogs}
+        OnClick={handleLikeButton}
+        user={currentUser}
+        handleRemove={handleRemove}
+      />
+    )
+  }
 
   return (
     <div>
@@ -213,18 +233,13 @@ const App = () => {
             {showBlogForm()}
           </div>
         }
-        <ShowBlogs
-            blogs={blogs}
-            OnClick={handleLikeButton}
-            user={currentUser}
-            handleRemove={handleRemove}
-        />
+        {shBlogs()}
       </div>
-      
+
     </div>
   )
 }
 
-export default App;
+export default App
 
 

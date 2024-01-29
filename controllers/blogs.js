@@ -21,13 +21,16 @@ blogsRouter.get('/:id', async (request, response) => {
 })
 
 blogsRouter.delete('/:id', async (request, response) => {
-    const user = request.user
-    const userId = user.id
+    const userId = request.user.id
+    const user = await User.findById(userId) 
+
     const blogId = request.params.id
     const blog = await Blog.findById(blogId)
 
     if (blog.user.toString() === userId.toString()){
         await Blog.findByIdAndDelete(blogId)
+        user.blogs = user.blogs.filter(b => b != blogId)
+        await user.save()
         response.status(204).end()
     }
     else{
@@ -66,16 +69,29 @@ blogsRouter.post('/', async (request, response, next) => {
 
 blogsRouter.put('/:id', async (request, response, next) => {
     const body = request.body
-    const user = request.user
+    const userId = request.user.id
+    const user = await User.findById(userId)
    
     const blog = await Blog.findById(request.params.id)
 
     const action = body.action? 1 : -1
 
-    const userList = body.action
-        ? blog.likedBy.concat(user.id)
-        : blog.likedBy.filter(u => u != user.id)
-    
+    let userList
+    if (body.action){
+      if (blog.likedBy.some(id => id.toString() === userId.toString())) {
+        return response.status(400).json({ error: 'Blog already liked by user' })
+      } else {
+        userList = blog.likedBy.concat(userId)
+      }
+    } else {
+      if (blog.likedBy.some(id => id.toString() === userId.toString())) {
+        userList = blog.likedBy.filter(u => u.toString() != userId.toString())
+      }
+      else {
+        return response.status(400).json({ error: 'Blog already disliked by user' })
+      }
+    }
+        
     //console.log('userList',userList)
     
     const newData = {
@@ -91,15 +107,27 @@ blogsRouter.put('/:id', async (request, response, next) => {
         { new: true})
 
     //console.log('updateBlog',updatedBlog)
-    
+    let blogList
+    if (body.action) {
+      if (!user.liked.some(id => id.toString() === request.params.id.toString())) {
+        blogList = user.liked.concat(request.params.id)
+      }
+      else {
+        return response.status(400).json({error: 'Blog already liked by user'})
+      }
+    } else {
+      if (user.liked.some(id => id.toString() === request.params.id.toString())) {
+        blogList = user.liked.filter(b => b.toString() !== request.params.id.toString())
+      }
+      else {
+        return response.status(400).json({error: 'Blog already disliked by user'})
+      }
+  }
 
-    if (user) {
-        const blogList = body.action
-            ? user.liked.concat(updatedBlog._id)
-            : user.liked.filter(b => b != updatedBlog._id)
-        user.liked = blogList
-        await user.save()
-    }
+    //console.log(blogList)
+    const upUser = { ...user.toObject(), liked: blogList }
+    //console.log(upUser)
+    await User.findByIdAndUpdate({ _id:userId}, upUser, {new: true})
     
     response.status(200).json(updatedBlog)
 })
