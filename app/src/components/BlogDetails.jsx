@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import LikeButton from './LikeButton'
 import RemoveButton from './RemoveButton'
 
 const BlogDetails = ({ blog, OnClick, user, handleRemove }) => {
   const [visible, setVisible] = useState(true)
+  const [likedBlog, setLikedBlog] = useState(false)
 
   const button = () => {
     return (
@@ -13,12 +14,18 @@ const BlogDetails = ({ blog, OnClick, user, handleRemove }) => {
     )
   }
 
-  let likedBlog
-  if (user){
-    likedBlog = blog.likedBy
-      ? blog.likedBy.some(u => u === user.id)
-      : false
-  }
+  useEffect(() => {
+    if (user) {
+      /*
+      console.log(`${blog.title} liked by ${user.username}:`,
+        blog.likedBy.some(u => u.toString() === user.id.toString()))
+      */
+      setLikedBlog(blog.likedBy
+        ? blog.likedBy.some(u => u.toString() === user.id.toString())
+        : false
+      )
+    }
+  }, [user, blog.likedBy])
 
   const ownedBlog = user? user.blogs.find(b => b.id === blog.id): false
 

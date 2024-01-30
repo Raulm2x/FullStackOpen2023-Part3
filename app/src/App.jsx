@@ -56,7 +56,7 @@ const App = () => {
 
   useEffect(() => {
     hook()
-  }, [])
+  }, [currentUser])
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
@@ -106,24 +106,41 @@ const App = () => {
         }
         : b
       ))
-      console.log('upBlogs', upBlogs) // Works as expected
+      console.log('upBlogs', upBlogs)
       setBlogs(upBlogs)
 
-      console.log('blogs',blogs) // Doesn't show the same as upBlogs
       const upUser = { ...currentUser,
         liked: action
           ? currentUser.liked.concat(blog.id)
           : currentUser.liked.filter(l => l.toString() !== blog.id.toString()) }
-      console.log('upUser', upUser) // Works as expected
-      setCurrentUser(upUser)
-      console.log('currentUser',currentUser) // Doesn't show the same as upBlogs
-      setUsers(users.map(u => u.id.toString() === upUser.id.toString()? upUser : u ))
-      console.log('users',users) // users list don't get updated too
+      console.log('upUser', upUser)
+      if (upUser && currentUser !== upUser) {
+        setCurrentUser(upUser)
+      }
+
+      const updatedUsers = users.map(u => u.id.toString() === upUser.id.toString()? upUser : u )
+      if (updatedUsers && users !== updatedUsers) {
+        setUsers(updatedUsers)
+      }
 
     } catch (error){
       console.error(error)
     }
   }
+
+  /* // Check if blogs, currentUser and users updated after press dis/like button
+
+  useEffect(() => {
+    console.log('blogs', blogs)
+  }, [blogs])
+
+  useEffect(() => {
+    console.log('currentUser',currentUser)
+  }, [currentUser])
+
+  useEffect(() => {
+    console.log('users',users)
+  }, [users])*/
 
   //Remove Button
   const handleRemove = async (blog) => {
