@@ -97,20 +97,28 @@ const App = () => {
     try {
       await apiBlogs.update(blog.id, updatedBlog)
       console.log(action? 'liked':'disliked')
-
       const upBlogs = blogs.map(b => (b.id === blog.id
         ? { ...blog,
-          likes: blog.likes + (action? 1:-1)
+          likes: blog.likes + (action? 1:-1),
+          likedBy: action
+            ? blog.likedBy.concat(currentUser.id)
+            : blog.likedBy.filter(b => b !== currentUser.id)
         }
         : b
       ))
+      console.log('upBlogs', upBlogs) // Works as expected
       setBlogs(upBlogs)
+
+      console.log('blogs',blogs) // Doesn't show the same as upBlogs
       const upUser = { ...currentUser,
         liked: action
           ? currentUser.liked.concat(blog.id)
-          : currentUser.liked.filter(l => l !== blog.id) }
+          : currentUser.liked.filter(l => l.toString() !== blog.id.toString()) }
+      console.log('upUser', upUser) // Works as expected
       setCurrentUser(upUser)
-      setUsers(users.map(u => u.id === upUser.id? upUser : u ))
+      console.log('currentUser',currentUser) // Doesn't show the same as upBlogs
+      setUsers(users.map(u => u.id.toString() === upUser.id.toString()? upUser : u ))
+      console.log('users',users) // users list don't get updated too
 
     } catch (error){
       console.error(error)
