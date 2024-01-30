@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import PropTypes from 'prop-types'
+
 import LikeButton from './LikeButton'
 import RemoveButton from './RemoveButton'
 
@@ -49,6 +51,13 @@ const BlogDetails = ({ blog, OnClick, user, handleRemove }) => {
       }
     </li>
   )
+}
+
+BlogDetails.propTypes = {
+  blog: PropTypes.object.isRequired,
+  OnClick: PropTypes.func.isRequired,
+  user: PropTypes.object.isRequired,
+  handleRemove: PropTypes.func.isRequired,
 }
 
 export default BlogDetails

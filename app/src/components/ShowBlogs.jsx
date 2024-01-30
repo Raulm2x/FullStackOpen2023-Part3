@@ -1,4 +1,5 @@
 import BlogDetails from './BlogDetails'
+import PropTypes from 'prop-types'
 
 const ShowBlogs = ({ blogs, OnClick, user, handleRemove }) => {
   return (
@@ -16,6 +17,13 @@ const ShowBlogs = ({ blogs, OnClick, user, handleRemove }) => {
       </ul>
     </div>
   )
+}
+
+ShowBlogs.propTypes = {
+  blogs: PropTypes.array.isRequired,
+  OnClick: PropTypes.func.isRequired,
+  user: PropTypes.object.isRequired,
+  handleRemove: PropTypes.func.isRequired,
 }
 
 export default ShowBlogs

@@ -56,7 +56,7 @@ const App = () => {
 
   useEffect(() => {
     hook()
-  }, [currentUser])
+  }, [])
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
@@ -97,6 +97,7 @@ const App = () => {
     try {
       await apiBlogs.update(blog.id, updatedBlog)
       console.log(action? 'liked':'disliked')
+
       const upBlogs = blogs.map(b => (b.id === blog.id
         ? { ...blog,
           likes: blog.likes + (action? 1:-1),
@@ -106,14 +107,14 @@ const App = () => {
         }
         : b
       ))
-      console.log('upBlogs', upBlogs)
+      //console.log('upBlogs', upBlogs)
       setBlogs(upBlogs)
 
       const upUser = { ...currentUser,
         liked: action
           ? currentUser.liked.concat(blog.id)
           : currentUser.liked.filter(l => l.toString() !== blog.id.toString()) }
-      console.log('upUser', upUser)
+      //console.log('upUser', upUser)
       if (upUser && currentUser !== upUser) {
         setCurrentUser(upUser)
       }
@@ -122,7 +123,6 @@ const App = () => {
       if (updatedUsers && users !== updatedUsers) {
         setUsers(updatedUsers)
       }
-
     } catch (error){
       console.error(error)
     }
@@ -258,6 +258,7 @@ const App = () => {
             {showBlogForm()}
           </div>
         }
+        <br/>
         {shBlogs()}
       </div>
 
