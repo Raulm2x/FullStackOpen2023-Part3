@@ -5,7 +5,7 @@ import LikeButton from './LikeButton'
 import RemoveButton from './RemoveButton'
 
 const BlogDetails = ({ blog, OnClick, user, handleRemove }) => {
-  const [visible, setVisible] = useState(true)
+  const [visible, setVisible] = useState(false)
   const [likedBlog, setLikedBlog] = useState(false)
 
   const button = () => {
@@ -32,11 +32,11 @@ const BlogDetails = ({ blog, OnClick, user, handleRemove }) => {
   const ownedBlog = user? user.blogs.find(b => b.id === blog.id): false
 
   return (
-    <li>
+    <li className='blog'>
       <h3>{blog.title} {button()}</h3>
+      Author: {blog.author}<br/>
       {visible &&
-        <div>
-          Author: {blog.author}<br/>
+        <div className='moreDetails'>
           Url: <a href={blog.url} target="_blank" rel='noreferrer'>{blog.url}</a><br/>
           Likes: {blog.likes}
           {user && <LikeButton OnClick={OnClick} blog={blog} liked={likedBlog}/>}
